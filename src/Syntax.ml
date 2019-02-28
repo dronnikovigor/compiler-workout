@@ -41,7 +41,30 @@ module Expr =
        Takes a state and an expression, and returns the value of the expression in 
        the given state.
     *)
-    let eval _ = failwith "Not implemented yet"
+    let bool_to_int b = if b then 1 else 0;;
+    let int_to_bool i = i != 0;;
+      
+    let operator s =
+      match s with
+        | "+" -> ( + )
+        | "-" -> ( - )
+        | "*" -> ( * )
+        | "/" -> ( / )
+        | "%" -> ( mod )
+        | "<" -> fun left right -> bool_to_int (( < ) left right)
+        | ">" -> fun left right -> bool_to_int (( > ) left right)
+        | "<=" -> fun left right -> bool_to_int (( <= ) left right)
+        | ">=" -> fun left right -> bool_to_int (( >= ) left right)
+        | "==" -> fun left right -> bool_to_int (( == ) left right)
+        | "!=" -> fun left right -> bool_to_int (( != ) left right)
+        | "&&" -> fun left right -> bool_to_int (( && ) (int_to_bool left) (int_to_bool right))
+        | "!!" -> fun left right -> bool_to_int (( || ) (int_to_bool left) (int_to_bool right));;
+
+    let rec eval st exp =
+      match exp with
+        | Const value -> value
+        | Var name -> st name
+        | Binop (op, left, right) -> (operator op) (eval st left) (eval st right);;
 
   end
                     
@@ -65,7 +88,14 @@ module Stmt =
 
        Takes a configuration and a statement, and returns another configuration
     *)
-    let eval _ = failwith "Not implemented yet"
+    let rec eval config statement =
+      let (state, input, output) = config in
+      match statement with
+        | Read var_name -> (match input with
+          | head::tail -> (Expr.update var_name head state, tail, output))
+        | Write expr -> (state, input, output @ [Expr.eval state expr])
+        | Assign (var_name, expr) -> (Expr.update var_name (Expr.eval state expr) state, input, output)
+        | Seq (state1, state2) -> eval (eval config state1) state2;;  
                                                          
   end
 
