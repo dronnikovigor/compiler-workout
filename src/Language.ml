@@ -120,15 +120,16 @@ module Stmt =
 
        Takes a configuration and a statement, and returns another configuration
     *)
-    let (st, input, output) = conf in
-      match op with
-        | Read var  -> (match input with
-                | x::rest -> (Expr.update var x st), rest, output
-                | [] -> failwith("No more input")
-              )
-        | Write exp      -> st, input, (output @ [Expr.eval st exp])
-        | Seq (first, second)       -> eval (eval conf first) second
-        | Assign (var, exp) -> (Expr.update var (Expr.eval st exp) st), input, output 
+    let rec eval conf op =
+	    let (st, input, output) = conf in
+	      match op with
+	        | Read var  -> (match input with
+	                | x::rest -> (Expr.update var x st), rest, output
+	                | [] -> failwith("No more input")
+	              )
+	        | Write exp      -> st, input, (output @ [Expr.eval st exp])
+	        | Seq (first, second)       -> eval (eval conf first) second
+	        | Assign (var, exp) -> (Expr.update var (Expr.eval st exp) st), input, output 
 
     (* Statement parser *)
     ostap (
