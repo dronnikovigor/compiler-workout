@@ -24,8 +24,9 @@ type config = int list * Stmt.config
 
    Takes a configuration and a program, and returns a configuration as a result
 *)                         
-let rec eval conf prog = failwith "Not yet implemented"
+let eval_insn config insn = 
   let (stack, stmt_config) = config in
+  let (state, input, output) = stmt_config in
   match insn with
   | BINOP operator -> (match stack with
     | y::x::tail -> ([(Language.Expr.eval_op operator) x y]@tail, stmt_config))
