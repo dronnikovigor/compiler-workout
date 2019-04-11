@@ -204,7 +204,7 @@ class env =
         | (S n)::_                      -> S (n+1) , n+1
         | (R n)::_ when n < num_of_regs -> R (n+1) , stack_slots
         | (M _)::s                      -> allocate' s
-        | _                             -> S 0     , n+1
+        | _                             -> S 0     , 1
         in
         allocate' stack
       in
